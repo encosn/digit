@@ -268,6 +268,14 @@ body.posted .tag.wrong::after { content: ' ✕'; text-decoration: none; }
   background: rgba(255, 77, 109, .1);
 }
 .leak-head { display: block; font-size: 19px; color: #ff9db0; margin-bottom: 9px; }
+/* 「개인 정보」 네 글자가 한눈에 들어오게 — 이 활동에서 가장 중요한 말이다 */
+.leak-hi {
+  color: #fff;
+  background: rgba(255, 77, 109, .34);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 77, 109, .7);
+  border-radius: 7px;
+  padding: 1px 8px;
+}
 .leak-box ul { margin: 0; padding-left: 22px; font-size: 17px; color: var(--sub); }
 .leak-box li { margin: 5px 0; }
 .leak-box li b { color: #fff; }
@@ -679,8 +687,12 @@ select option { background-color: #262e60; color: #eef1ff; }
 }
 .warn-box b { color: #fff; }
 .warn-box p { margin: 8px 0 0; color: inherit; }
-.del-head { display: block; font-size: 20px; line-height: 1.45; color: #fff !important; }
+/* 「지워도 계속 퍼진다」는 이 활동의 결론이다 — 네 문장만 한 단계 크게·진하게·노란색으로 뽑는다.
+   나머지 설명은 분홍색 본문이라 대비가 뚜렷하다. */
+.del-head { display: block; font-size: 21px; line-height: 1.45; font-weight: 800; color: #ffd166 !important; }
+.del-em { font-weight: 800; color: #ffd166; }
 .del-why { font-size: 17px; }
+.del-why .del-em { font-size: 18px; }
 .del-more {
   font-size: 22px;
   font-weight: 800;
@@ -699,8 +711,8 @@ select option { background-color: #262e60; color: #eef1ff; }
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 .del-sum { font-size: 16px; font-weight: 600; color: #ffc3ce !important; }
-.del-lesson { font-size: 17px; }
-.del-lesson b { color: #fff; }
+.del-lesson { font-size: 18px; font-weight: 800; color: #ffd166 !important; }
+.del-lesson b { color: #ffe08a; }
 
 /* ═══════════════════════════════════════════════════════════════
    화면 한 컷에 들어오게 하는 조절 (2026-08-01)

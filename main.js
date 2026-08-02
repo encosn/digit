@@ -660,12 +660,12 @@
       '<b class="del-head">🗑️ ' + S.deletedAt.toFixed(1) + '분에 홍길동이 글을 지웠어요. ' +
         '하지만 확산은 멈추지 않습니다.</b>' +
       '<p class="del-why">지운 순간 이미 <b>' + fmt(S.deletedPeople) + '명</b>이 본 뒤였고, ' +
-        '그 사람들이 <b>자기 계정으로 퍼뜨린 글</b>은 홍길동이 지울 수 없어요. ' +
-        '그래서 지금도 그 글을 보고, 또 퍼뜨리는 사람이 계속 생깁니다.</p>' +
+        '그 사람들이 <b>자기 계정으로 퍼뜨린 글</b>은 홍길동이 지울 수 없어요.<br>' +
+        '<span class="del-em">그래서 지금도 그 글을 보고, 또 퍼뜨리는 사람이 계속 생깁니다.</span></p>' +
       '<p class="del-more">' +
         (after > 0
           ? '지운 뒤에 더 본 사람 <b>' + fmt(after) + '명</b>' + (spreading ? ' <em>… 계속 늘어나는 중</em>' : '')
-          : '<b>지금도 퍼지는 중…</b> <em>곧 숫자가 올라갑니다</em>') +
+          : '<span class="del-em">지금도 퍼지는 중…</span> <em>곧 숫자가 올라갑니다</em>') +
         ' <span class="del-sum">(지금까지 모두 ' + fmt(nowTotal) + '명)</span></p>' +
       '<p class="del-lesson">디지털 공간에 한 번 올린 정보는 <b>내가 지워도 완전히 사라지지 않는다.</b></p>';
   }
@@ -709,13 +709,18 @@
         $('deleteOut').textContent = '먼저 ▶ 확산 시작을 눌러 정보가 퍼지기 시작한 뒤에 지워 보세요.';
         return;
       }
+      /* ⚠️ 확산이 이미 끝난 시각(11분 이후)에 지우면 더 늘어날 사람이 없어서
+         "곧 숫자가 올라갑니다" 가 영영 지켜지지 않는다. 그래서 **아직 퍼지는 중인 시점으로
+         되감고** 거기서 지운 것으로 한다 — 시계도 함께 되감기므로 문구와 어긋나지 않는다. */
+      if (S.t >= S.maxSee) setTime(4);
+
       S.deleted = true;
       S.deletedAt = S.t;
       S.deletedPeople = C.peopleAt(S.nodes, S.t, S.followers).total;
       this.disabled = true;
       render();
       // 지운 뒤에도 계속 퍼지는 것을 바로 보여 준다 (멈춰 있으면 숫자가 0으로 보여 오해한다)
-      if (!S.playing && S.t < END_T) play();
+      if (!S.playing) play();
     });
 
     // 지구본 끌어서 돌리기 — 가로는 회전, 세로는 기울기. 자동 회전 위에 더해진다.

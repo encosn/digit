@@ -1,0 +1,17 @@
+{
+  "name": "spread-simulator",
+  "private": true,
+  "version": "1.0.0",
+  "description": "디지털 공간에서 정보의 확산 속도 체험하기 (중학교 정보 5단원 디지털 문화)",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests/run-tests.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^8.1.5"
+  }
+}

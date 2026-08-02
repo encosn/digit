@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📢 디지털 공간에서 정보의 확산 속도 체험하기</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ───────────── 머리말 ───────────── -->
+  <header class="card hero">
+    <p class="unit-tag">중학교 정보 · 5단원 디지털 문화</p>
+    <h1>디지털 공간에서 정보의 확산 속도 체험하기</h1>
+    <p class="goal"><b>활동 목표</b> 디지털 공간에서 정보가 얼마나 빨리 확산되는지 체험할 수 있다.</p>
+
+    <ol class="steps" id="steps">
+      <li class="on"><b>1</b> 사진 올리기</li>
+      <li><b>2</b> 문제 풀기 <em>예상</em></li>
+      <li><b>3</b> 퍼지는 모습 보기 <em>확인</em></li>
+      <li><b>4</b> 더 알아보기</li>
+    </ol>
+
+    <div class="hero-grid">
+      <!-- 상황을 SNS 게시물 모양으로 — 학생이 직접 눌러서 "올린다" -->
+      <div class="post-wrap">
+        <p class="post-cue" id="postCue">👇 <b>올리기 전에!</b> 이 게시물에서
+          <b>개인 정보가 담긴 해시태그</b>를 눌러 골라 보세요. <span class="mute">(몇 개인지는 비밀 🤫)</span></p>
+
+        <div class="post" id="post">
+          <div class="post-top">
+            <span class="avatar">홍</span>
+            <span class="post-who"><b>홍길동</b><em id="postTime">새 게시물 · 🌐 전체 공개</em></span>
+          </div>
+
+          <!-- 인생네컷 사진 (그림) — 외부 이미지 파일 없이 SVG 로 직접 그린다 -->
+          <svg class="photo" viewBox="0 0 320 252" role="img"
+               aria-label="여중생 두 명이 인생네컷을 찍은 모습을 그린 그림">
+            <defs>
+              <clipPath id="frClip"><rect width="146" height="98" rx="9"/></clipPath>
+              <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffd7e6"/><stop offset="1" stop-color="#fff0f6"/></linearGradient>
+              <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#d8ecff"/><stop offset="1" stop-color="#f0f8ff"/></linearGradient>
+              <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffe9c9"/><stop offset="1" stop-color="#fff8ec"/></linearGradient>
+              <linearGradient id="bg4" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#d9f5ea"/><stop offset="1" stop-color="#f0fdf8"/></linearGradient>
+
+              <!-- 왼쪽 친구: 긴 머리 + 분홍 후드 -->
+              <g id="gA">
+                <path d="M-18 48 q1-20 18-20 q17 0 18 20z" fill="#ff8fb8"/>
+                <path d="M-17 4 q0-22 17-22 q17 0 17 22 v30 q-5 4-9 1 v-21 h-16 v21 q-4 3-9-1z" fill="#5c3b2c"/>
+                <circle cx="0" cy="6" r="13" fill="#ffe2ce"/>
+                <path d="M-13 4 q2-14 13-14 q11 0 13 14 q-7-7-13-7 q-6 0-13 7z" fill="#5c3b2c"/>
+                <circle cx="-4.8" cy="8" r="1.7" fill="#3b2a22"/>
+                <circle cx="4.8" cy="8" r="1.7" fill="#3b2a22"/>
+                <path d="M-3 12.5 q3 3.2 6 0" stroke="#cf6f7c" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                <circle cx="-8.6" cy="11" r="2.1" fill="#ffb3c6" opacity=".85"/>
+                <circle cx="8.6" cy="11" r="2.1" fill="#ffb3c6" opacity=".85"/>
+              </g>
+
+              <!-- 오른쪽 친구: 양갈래 + 민트 가디건 + 노란 핀 -->
+              <g id="gB">
+                <path d="M-18 48 q1-20 18-20 q17 0 18 20z" fill="#6fdac6"/>
+                <circle cx="-17" cy="15" r="7.5" fill="#3f2f4a"/>
+                <circle cx="17" cy="15" r="7.5" fill="#3f2f4a"/>
+                <path d="M-15 2 q0-20 15-20 q15 0 15 20 v14 q-4 3-7 1 v-13 h-16 v13 q-3 2-7-1z" fill="#3f2f4a"/>
+                <circle cx="0" cy="6" r="13" fill="#ffe2ce"/>
+                <path d="M-13 3 q3-13 13-13 q10 0 13 13 q-8-6-13-6 q-5 0-13 6z" fill="#3f2f4a"/>
+                <rect x="5.5" y="-7" width="8" height="3.6" rx="1.8" fill="#ffd166"/>
+                <circle cx="-4.8" cy="8" r="1.7" fill="#3b2a22"/>
+                <circle cx="4.8" cy="8" r="1.7" fill="#3b2a22"/>
+                <path d="M-3.4 12 q3.4 4 6.8 0" stroke="#cf6f7c" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                <circle cx="-8.6" cy="11" r="2.1" fill="#ffb3c6" opacity=".85"/>
+                <circle cx="8.6" cy="11" r="2.1" fill="#ffb3c6" opacity=".85"/>
+              </g>
+
+              <g id="peace" fill="#ffe2ce">
+                <circle r="4.8"/>
+                <path d="M-3.2-2 l-1.7-7.2 a1.3 1.3 0 0 1 2.5-.6 l1.2 6.8z"/>
+                <path d="M3.2-2 l1.7-7.2 a1.3 1.3 0 0 0-2.5-.6 l-1.2 6.8z"/>
+              </g>
+              <path id="heart" d="M0 4.5 C-5.2-1-7.4-5.2-4.2-7 C-2-8.4 0-6.4 0-4.8 C0-6.4 2-8.4 4.2-7 C7.4-5.2 5.2-1 0 4.5z"/>
+            </defs>
+
+            <rect width="320" height="252" rx="15" fill="#fffdfe"/>
+            <g clip-path="url(#frClip)" transform="translate(10,10)">
+              <rect width="146" height="98" fill="url(#bg1)"/>
+              <use href="#gA" transform="translate(52,50)"/>
+              <use href="#gB" transform="translate(96,52)"/>
+              <use href="#peace" transform="translate(33,34)"/>
+              <use href="#heart" fill="#ff6f96" transform="translate(122,22) scale(1.3)"/>
+            </g>
+            <g clip-path="url(#frClip)" transform="translate(164,10)">
+              <rect width="146" height="98" fill="url(#bg2)"/>
+              <use href="#gA" transform="translate(54,52) rotate(9)"/>
+              <use href="#gB" transform="translate(94,52) rotate(-9)"/>
+              <use href="#heart" fill="#ff8fb0" transform="translate(74,16)"/>
+              <use href="#heart" fill="#ffc2d4" transform="translate(24,26) scale(.8)"/>
+              <use href="#heart" fill="#ffc2d4" transform="translate(124,30) scale(.8)"/>
+            </g>
+            <g clip-path="url(#frClip)" transform="translate(10,116)">
+              <rect width="146" height="98" fill="url(#bg3)"/>
+              <use href="#gA" transform="translate(50,52)"/>
+              <use href="#gB" transform="translate(98,50)"/>
+              <use href="#peace" transform="translate(117,34) scale(-1,1)"/>
+              <g fill="#ffd166">
+                <circle cx="22" cy="20" r="3"/><circle cx="34" cy="12" r="2"/><circle cx="128" cy="66" r="2.4"/>
+              </g>
+            </g>
+            <g clip-path="url(#frClip)" transform="translate(164,116)">
+              <rect width="146" height="98" fill="url(#bg4)"/>
+              <use href="#gA" transform="translate(53,51)"/>
+              <use href="#gB" transform="translate(95,51)"/>
+              <use href="#heart" fill="#ff6f96" transform="translate(74,20) scale(1.5)"/>
+              <use href="#peace" transform="translate(30,36)"/>
+              <use href="#peace" transform="translate(118,36) scale(-1,1)"/>
+            </g>
+            <text x="160" y="238" class="photo-cap">우리 우정 ♡ 인생네컷</text>
+          </svg>
+
+          <p class="post-cap">오늘 하윤이랑 인생네컷 찍음 ㅋㅋ 완전 인생샷 ✌️</p>
+          <!-- 태그는 버튼이다. 올리기 전에 학생이 "개인 정보 같다" 싶은 것을 골라 본다. -->
+          <p class="post-tags" id="postTags">
+            <button type="button" class="tag">#인생네컷</button><button type="button" class="tag">#네컷사진</button><button type="button" class="tag">#베프</button><button type="button" class="tag">#우정스타그램</button><button type="button" class="tag">#데일리</button><button type="button" class="tag" data-leak="1">#별빛중</button><button type="button" class="tag" data-leak="1">#2학년7반</button><button type="button" class="tag" data-leak="1">#15살</button><button type="button" class="tag" data-leak="1">#햇살아파트103동</button><button type="button" class="tag" data-leak="1">#금요일5시_별빛학원앞</button><button type="button" class="tag" data-leak="1">#내번호010-1234-5678_디엠ㄱㄱ</button>
+          </p>
+          <p class="pick-count" id="pickCount"></p>
+          <p class="tag-score hidden" id="tagScore"></p>
+
+          <button class="btn primary post-share" id="btnPost">📤 게시하기</button>
+          <div class="post-actions hidden" id="postActions">
+            <span>♡ 좋아요</span><span>💬 댓글</span><span class="hot">↪ 공유</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-wrap">
+        <p class="story">
+          홍길동이 사진이나 글을 올리면 <b>친구 관계에 있는 모든 사용자</b>가 볼 수 있다.<br>
+          그런데 사진과 해시태그에 <b class="danger">홍길동과 친구의 개인 정보</b>가 그대로 담겨 있다면?<br>
+          <b>몇 분 만에, 몇 명에게</b> 퍼지는지 직접 보자.
+        </p>
+
+        <div class="leak-box stage-locked" id="leakBox">
+          <b class="leak-head">⚠️ 사진 한 장에 이만큼이 담겨 있었어요</b>
+          <ul>
+            <li>🏫 학교 · 학년 · 반 — <b>별빛중 2학년 7반</b></li>
+            <li>🎂 나이 — <b>15살</b></li>
+            <li>🏠 사는 곳 — <b>햇살아파트 103동</b></li>
+            <li>🕔 매주 같은 시간, 같은 장소 — <b>금요일 5시 별빛학원 앞</b></li>
+            <li>📞 전화번호 — <b>010-1234-5678</b></li>
+            <li>🙋 함께 찍은 <b>친구의 얼굴과 이름</b> — 하윤이는 올려도 된다고 했을까?</li>
+          </ul>
+          <p class="leak-note">※ 위 정보는 모두 수업용으로 지어낸 <b>가상의 정보</b>입니다.</p>
+        </div>
+
+        <button class="btn primary big next-btn stage-locked" id="btnNext">
+          다음으로 넘어가기 → <small>이 정보가 얼마나 퍼질지 먼저 예상해 보기</small>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ───────────── ① 문제 풀기 (먼저 예상해 본다) ───────────── -->
+  <section class="card stage-locked" id="quizCard">
+    <h2><span class="h2-num">①</span>문제 풀기 — 먼저 예상해 보기</h2>
+    <!-- 위: 교과서 그림 + 그림 읽는 법 (좌우로) / 아래: 문제 세 개 (전체 폭)
+         그림을 크게 보여 주려고 위쪽을 넓게 쓰고, 문제는 아래에 한 줄로 폈다. -->
+    <div class="quiz-top">
+      <figure class="tb-fig">
+        <!-- 그림은 main.js 가 spread-core 의 관계망 자료로 그린다 (교과서와 같은 7명·31명) -->
+        <svg id="tbFig" role="img" aria-label="홍길동을 가운데 두고 1차 확산자 7명, 2차 확산자 31명이 두 겹으로 둘러싼 교과서 관계망 그림"></svg>
+        <figcaption>교과서 「해 보기 1」 관계망 그림</figcaption>
+      </figure>
+
+      <div class="diagram-note" id="quizIntro">
+      <h3>📖 그림 읽는 법</h3>
+      <p>가운데 <b>홍길동</b>, 그 둘레를 사람이 <b>두 겹</b>으로 둘러쌌어요.
+        글을 올리면 <b>선으로 이어진 사람</b>이 차례로 봅니다.</p>
+      <ul>
+        <li><b>안쪽 겹</b> = 홍길동과 바로 이어진 검은 사람 <b>7명</b> (1차 확산)</li>
+        <li><b>바깥쪽 겹</b> = 그 7명과 이어진 흰 사람 <b>31명</b> (2차 확산)</li>
+        <li>사람 <b>1개</b> = 팔로워 <b>100명</b></li>
+        <li>선 위 숫자 = 두 사람이 <b>보는 데 걸린 시간(분)</b></li>
+        <li>홍길동 → 1차 → 2차 선의 시간을 다 더해도 <b>10분 미만</b></li>
+      </ul>
+      <p class="dn-tip">💡 그림을 보고 세 문제의 답을 <b>예상해서</b> 써 보세요.
+        다 쓰면 <b>확산 그림</b>이 열립니다.</p>
+      </div>
+    </div>
+
+    <div class="quiz-qs">
+    <p class="note hidden" id="quizFollowersNote">
+      ⚠️ 지금 팔로워 수가 <b id="quizFollowersNow">100</b>명으로 바뀌어 있어요.
+      아래 문제는 교과서와 같이 <b>팔로워 100명</b> 기준으로 채점합니다.
+      <button class="btn tiny" id="btnBack100">100명으로 되돌리기</button>
+    </p>
+
+    <div class="q" data-q="1">
+      <p class="q-text"><b>(1)</b> 홍길동이 누군가의 개인 정보를 자신의 계정에 업로드하였을 때,
+        홍길동과 <b>직접 연결되어 있는</b> 몇 명의 사람(1차 확산)이 보게 되는지 써 보자.</p>
+      <div class="q-row">
+        <input type="text" inputmode="numeric" class="q-input" aria-label="답(명)">
+        <span class="q-unit">명</span>
+        <button class="btn primary q-check">확인</button>
+        <button class="btn ghost q-hint">💡 힌트</button>
+      </div>
+      <p class="q-msg"></p>
+    </div>
+
+    <div class="q" data-q="2">
+      <p class="q-text"><b>(2)</b> 홍길동의 게시 글을 1차로 본 사람들이 모두 자신의 계정에 다시 공유하게 되면
+        <b>2차</b>로 몇 명이 보게 되는지 써 보자.</p>
+      <div class="q-row">
+        <input type="text" inputmode="numeric" class="q-input" aria-label="답(명)">
+        <span class="q-unit">명</span>
+        <button class="btn primary q-check">확인</button>
+        <button class="btn ghost q-hint">💡 힌트</button>
+      </div>
+      <p class="q-msg"></p>
+    </div>
+
+    <div class="q" data-q="3">
+      <p class="q-text"><b>(3)</b> <b>10분 안에</b> 얼마나 많은 사람에게 확산될지 알아보자.</p>
+      <div class="q-row">
+        <input type="text" inputmode="numeric" class="q-input" aria-label="답(명)">
+        <span class="q-unit">명</span>
+        <button class="btn primary q-check">확인</button>
+        <button class="btn ghost q-hint">💡 힌트</button>
+      </div>
+      <p class="q-msg"></p>
+    </div>
+
+    <p class="next-hint" id="quizHint">🔒 세 문제에 모두 답을 쓰면 아래에
+      <b>퍼져 나가는 모습</b>이 열려요.</p>
+    <button class="btn primary big next-btn stage-locked" id="btnToSim">
+      확산 보러 가기 → <small>내 예상이 맞았는지 확인하기</small>
+    </button>
+    </div>
+  </section>
+
+  <!-- ───────────── ② 시뮬레이션 ───────────── -->
+  <!-- 이 카드만 어둡다 — "온라인 공간"을 나타내고, 그 안에서 지구본이 빛나며 퍼진다. -->
+  <section class="card sim-card stage-locked" id="simCard">
+    <h2><span class="h2-num">②</span>퍼져 나가는 모습 보기 — 예상이 맞았을까?</h2>
+
+    <div class="stage-pick">
+      <div class="segmented one">
+        <span class="seg on">🌍 한국 → 1차 → 2차 → 3차 → 4차<small>전 세계로 퍼지는 모습</small></span>
+      </div>
+      <p class="stage-pick-tip">한국에서 시작해 <b>육지를 따라</b> 퍼져 나갑니다.
+        지구는 <b>확산이 향하는 쪽</b>으로 돌고, 지구 뒤로 넘어간 사람은 잠시 보이지 않아요.</p>
+    </div>
+
+    <div class="sim-grid">
+
+      <!-- 지구본 -->
+      <div class="stage-box">
+        <div class="stage">
+          <!-- 그림은 전부 main.js 가 만든다 (지구·대륙·격자·사람·선·「N분」) -->
+          <svg id="net" role="img"
+               aria-label="한국에서 시작해 지구 위로 퍼져 나가는 확산 그림"></svg>
+        </div>
+
+        <ul class="legend">
+          <li><span class="chip chip-center"></span> 홍길동 (한국에서 올림)</li>
+          <li><span class="chip chip-lv1 on"></span> 1차 확산</li>
+          <li><span class="chip chip-lv2 on"></span> 2차 확산</li>
+          <li><span class="chip chip-lv3"></span> 3차 확산</li>
+          <li><span class="chip chip-lv4"></span> 4차 확산</li>
+          <li class="wide">🧍 점 1개 = 팔로워 <b id="legendFollowers">100</b>명</li>
+        </ul>
+      </div>
+
+      <!-- 계기판 + 조작 -->
+      <aside class="panel">
+        <div class="gauge">
+          <div class="gauge-row">
+            <span class="gauge-key">⏱ 경과 시간</span>
+            <span class="gauge-val" id="vTime">0.0분</span>
+          </div>
+          <div class="gauge-big">
+            <span class="gauge-key">👀 지금까지 본 사람</span>
+            <strong id="vPeople">0</strong><span class="unit">명</span>
+          </div>
+          <div class="gauge-split" id="stageSplit"></div>
+          <p class="tb-line hidden" id="tbLine"></p>
+          <div class="gauge-row">
+            <span class="gauge-key">⚡ 확산 속도</span>
+            <span class="gauge-val" id="vSpeed">-</span>
+          </div>
+          <p class="badge hidden" id="badge"></p>
+        </div>
+
+        <div class="pick-box">
+          <p class="pick-msg" id="pickMsg">🖱️ 지구본을 <b>끌어서 돌려</b> 볼 수 있어요
+            (가로=회전, 세로=기울기). 슬라이더를 끌면 원하는 시각의 모습을 볼 수 있어요.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 조작 줄은 좁은 오른쪽 칸에 두면 버튼이 세 줄로 접혀 화면이 길어진다 → 아래 전체 폭으로 뺐다 -->
+    <div class="sim-bar">
+      <div class="controls">
+        <button class="btn primary big" id="btnPlay">▶ 확산 시작</button>
+        <button class="btn" id="btnReset">↺ 처음으로</button>
+        <button class="btn" id="btn10">⏭ 10분으로</button>
+        <button class="btn" id="btnCenter">🌐 각도 되돌리기</button>
+        <label class="speed">
+          배속
+          <select id="selSpeed">
+            <option value="0.5">0.5배</option>
+            <option value="1" selected>1배</option>
+            <option value="2">2배</option>
+            <option value="4">4배</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="timeline">
+        <input type="range" id="slider" min="0" max="12" step="0.05" value="0"
+               aria-label="시간 슬라이더 (0분 ~ 12분)">
+        <div class="ruler">
+          <span>0분</span><span>2</span><span>4</span><span>6</span><span>8</span>
+          <span class="mark">10분</span><span>12</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="next-hint" id="nextHint">🔒 <b>10분</b>까지 확산을 지켜보면 아래에 <b>더 알아보기</b>가 열려요.
+      (<b>⏭ 10분으로</b> 버튼을 눌러도 됩니다)</p>
+  </section>
+
+  <!-- ───────────── ③ 더 알아보기 ───────────── -->
+  <section class="card stage-locked" id="deepCard">
+    <h2><span class="h2-num">③</span>더 알아보기</h2>
+
+    <!-- 심화 1: 팔로워 수 -->
+    <div class="deep">
+      <h3>👥 팔로워가 더 많다면?</h3>
+      <p>사람 모양 1개가 나타내는 <b>팔로워 수</b>를 바꿔 보자.
+        같은 9분 동안 몇 명에게 퍼지는지, <b>1분에 몇 명씩</b> 퍼지는지 비교해 보자.</p>
+      <div class="deep-row">
+        <label>사람 모양 1개 =
+          <select id="selFollowers">
+            <option value="50">팔로워 50명</option>
+            <option value="100" selected>팔로워 100명 (교과서)</option>
+            <option value="200">팔로워 200명</option>
+            <option value="500">팔로워 500명</option>
+          </select>
+        </label>
+        <p class="deep-out" id="followersOut"></p>
+      </div>
+    </div>
+
+    <!-- 심화 2: 글 삭제 -->
+    <div class="deep deep-alert">
+      <h3>🗑️ 글을 지우면 없던 일이 될까?</h3>
+      <p>확산이 시작된 뒤에 홍길동이 글을 지워 보자. 본 사람 수가 줄어들까?
+        <b>이미 퍼간 사람</b>이 있는데도 확산이 멈출까?</p>
+      <div class="deep-row">
+        <button class="btn danger" id="btnDelete">🗑️ 홍길동이 글 삭제하기</button>
+        <p class="deep-out" id="deleteOut"></p>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="foot-note">
+    <p class="footprint">🐾 한 번 남긴 <b>디지털 발자국</b>은 쉽게 지워지지 않습니다.</p>
+    <p>2022 개정 교육과정 · 중학교 정보 5단원 디지털 문화 [9정05-02] [9정05-03] ·
+      이 앱은 개인정보를 수집하거나 저장하지 않습니다.</p>
+  </footer>
+</div>
+
+<script src="spread-core.js" defer></script>
+<script src="main.js" defer></script>
+</body>
+</html>

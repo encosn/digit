@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>확산 그림 다른 안 — 골라 보기</title>
+<style>
+/* 시안 비교용 페이지. 본 앱(style.css)과 따로 두어, 여기서 뭘 고쳐도 수업용 화면에 영향이 없다. */
+:root {
+  color-scheme: dark;
+  --line: rgba(255,255,255,.14);
+  --surface: #1c2350;
+  --surface-2: rgba(255,255,255,.07);
+  --surface-3: rgba(0,0,0,.26);
+  --text: #eef1ff; --sub: #b3bbe4; --mute: #8f97c4;
+  --hot: #ff4d6d; --hot-s: #ff9db0; --warm: #ff9f1c; --teal: #12c2b0; --indigo: #8b8bf0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Pretendard","맑은 고딕","Malgun Gothic",sans-serif;
+  font-size: 20px; line-height: 1.7; color: var(--text);
+  word-break: keep-all; overflow-wrap: break-word;
+  background: radial-gradient(900px 520px at 12% -8%, #2a2f6b 0, transparent 60%),
+              linear-gradient(180deg,#171d45 0,#0e1230 60%,#0b0f28 100%);
+  background-attachment: fixed; min-height: 100vh;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 30px 18px 60px; }
+.tagline {
+  display: inline-block; margin: 0; padding: 5px 16px; border-radius: 999px;
+  background: rgba(139,139,240,.16); color: var(--indigo); font-size: 16px; font-weight: 800;
+}
+h1 { margin: 10px 0 12px; font-size: 38px; line-height: 1.28; letter-spacing: -1px; }
+h2 { margin: 0 0 6px; font-size: 24px; }
+.lead { margin: 0 0 26px; color: var(--sub); font-size: 19px; }
+.lead a { color: var(--indigo); }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 22px;
+  padding: 24px 26px; margin-bottom: 22px; box-shadow: 0 16px 40px rgba(0,0,0,.35);
+}
+.desc { margin: 0 0 16px; color: var(--sub); font-size: 18px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.tab {
+  font: inherit; font-size: 19px; font-weight: 700; padding: 11px 22px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: var(--surface-2); color: var(--sub); cursor: pointer;
+}
+.tab:hover { background: rgba(255,255,255,.14); color: var(--text); }
+.tab.on { background: linear-gradient(135deg,#7b6cf6,#4c7cf5); color: #fff; border-color: transparent; }
+
+.stage { background: #070a1c; border: 1px solid var(--line); border-radius: 18px; padding: 12px; }
+svg { width: 100%; height: auto; display: block; }
+.hidden { display: none !important; }
+
+.punch {
+  margin: 16px 0 0; padding: 14px 18px; border-radius: 14px;
+  background: rgba(255,77,109,.13); border: 1px solid rgba(255,77,109,.3);
+  font-size: 21px; color: var(--hot-s);
+}
+.punch b { color: #fff; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.btn {
+  font: inherit; font-size: 19px; font-weight: 700; padding: 11px 20px;
+  border: 1px solid var(--line); border-radius: 13px;
+  background: rgba(255,255,255,.1); color: var(--text); cursor: pointer;
+}
+.btn:hover { background: rgba(255,255,255,.18); }
+.btn.primary { background: linear-gradient(135deg,#7b6cf6,#4c7cf5); border-color: transparent; }
+.gauge { margin-left: auto; display: flex; gap: 18px; align-items: baseline; }
+.gauge span { color: var(--sub); font-size: 17px; }
+.gauge b { font-size: 30px; font-variant-numeric: tabular-nums; color: #fff; }
+.gauge .big b { font-size: 40px; color: #ff7d94; text-shadow: 0 0 26px rgba(255,77,109,.5); }
+input[type=range] { width: 100%; margin-top: 12px; accent-color: #7b6cf6; height: 30px; }
+
+/* 안 A — 낯선 화면들 */
+.ph .body { fill: #232a52; stroke: rgba(255,255,255,.09); stroke-width: 1; }
+.ph .scr { opacity: 0; }
+.ph.on .body { fill: #3a2246; stroke: rgba(255,111,150,.75); }
+.ph.on .scr { opacity: 1; }
+.ph.me .body { stroke: var(--teal); stroke-width: 1.8; }
+
+/* 안 B — 도는 지구본 위에서 퍼지기 */
+.ocean { fill: #0d1b3d; stroke: rgba(150,190,255,.35); stroke-width: 2.4; }
+.land { fill: rgba(96,170,150,.30); stroke: rgba(140,220,195,.5); stroke-width: 1.2; }
+.grat { fill: none; stroke: rgba(150,190,255,.13); stroke-width: 1.1; }
+.eq { fill: none; stroke: rgba(150,190,255,.26); stroke-width: 1.4; }
+/* ⚠️ 퍼지기 전 선·점은 아예 그리지 않는다 (path 를 비워 둔다) */
+.ed1 { fill: none; stroke: rgba(255,77,109,.85); stroke-width: 2.8; }
+.ed2 { fill: none; stroke: rgba(255,159,28,.7); stroke-width: 1.8; }
+.ed3 { fill: none; stroke: rgba(255,196,107,.5); stroke-width: 1.2; }
+.ed4 { fill: none; stroke: rgba(255,220,166,.35); stroke-width: .8; }
+.nd0 { fill: var(--teal); } .nd1 { fill: var(--hot); } .nd2 { fill: var(--warm); }
+.nd3 { fill: #ffc46b; }     .nd4 { fill: #ffdca6; }
+
+.mlab {
+  font-size: 23px; font-weight: 800; fill: #ffd9c2;
+  text-anchor: middle; dominant-baseline: middle;
+  paint-order: stroke; stroke: #06122a; stroke-width: 6px; stroke-linejoin: round;
+}
+.hud-bg { fill: rgba(6,10,28,.9); stroke: rgba(255,255,255,.16); stroke-width: 1.5; }
+.hud-t { font-size: 25px; fill: #b3bbe4; }
+.hud-big { font-size: 58px; font-weight: 900; fill: #ff7d94; }
+.hud-div { stroke: rgba(255,255,255,.16); stroke-width: 1.5; }
+.hud-r { font-size: 26px; font-weight: 700; fill: #eef1ff; }
+.hud-n { font-size: 26px; font-weight: 800; fill: #eef1ff; text-anchor: end; }
+
+/* 지구본 끌어서 돌리기 */
+#viewB { cursor: grab; touch-action: none; }
+#viewB.grabbing { cursor: grabbing; }
+.drag-hint { margin: 12px 0 0; font-size: 17px; color: var(--mute); }
+.drag-hint b { color: var(--sub); }
+.drag-hint.ready { color: #7dfbe4; }
+.drag-hint.ready b { color: #7dfbe4; }
+
+/* 규모 비교 */
+.scale-row { display: grid; grid-template-columns: 190px 1fr 130px; gap: 14px; align-items: center; margin: 10px 0; }
+.scale-row .nm { color: var(--sub); font-size: 18px; }
+.scale-row .nm em { font-style: normal; color: var(--mute); font-size: 15px; display: block; }
+.bar-bg { background: var(--surface-3); border-radius: 999px; height: 20px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,var(--warm),var(--hot)); }
+.scale-row .mx { text-align: right; font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.scale-row.hit .nm, .scale-row.hit .mx { color: #fff; }
+.note { margin: 16px 0 0; font-size: 16px; color: var(--mute); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="tagline">시안 비교용 — 수업 화면 아님</p>
+    <h1>확산 그림, 이렇게 바꾸면 어떨까요?</h1>
+    <p class="lead">교과서의 동심원 그림 대신 <b>두 가지 다른 그림</b>을 그려 봤습니다.
+      숫자와 시간은 <b>지금 앱과 똑같은 자료</b>를 그대로 씁니다
+      (1차 7 · 2차 31 · 3차 137 · 4차 607 = 782명, 사람 1 = 팔로워 100명).
+      <a href="index.html">← 지금 앱으로 돌아가기</a></p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab" data-view="a">안 A · 낯선 화면들</button>
+    <button class="tab on" data-view="b">안 B · 도는 지구본</button>
+  </div>
+
+  <section class="card">
+    <h2 id="vTitle"></h2>
+    <p class="desc" id="vDesc"></p>
+
+    <div class="stage">
+      <svg id="viewA" class="hidden" role="img" aria-label="내 사진이 뜬 낯선 사람들의 휴대폰 화면"></svg>
+      <svg id="viewB" role="img" aria-label="한국에서 시작해 지구본 위로 퍼져 나가는 그림"></svg>
+    </div>
+
+    <p class="drag-hint" id="dragHint">🖱️ 지구본을 <b>끌어서 돌려</b> 볼 수 있어요.
+      (가로로 끌면 돌고, 세로로 끌면 기울어집니다)</p>
+    <p class="punch" id="punch"></p>
+
+    <div class="controls">
+      <button class="btn primary" id="btnPlay">▶ 재생</button>
+      <button class="btn" id="btnReset">↺ 처음으로</button>
+      <button class="btn" id="btn10">⏭ 10분으로</button>
+      <button class="btn" id="btnCenter">🌐 각도 되돌리기</button>
+      <div class="gauge">
+        <span>⏱ <b id="vT">0.0</b>분</span>
+        <span class="big">👀 <b id="vN">0</b>명</span>
+      </div>
+    </div>
+    <input type="range" id="slider" min="0" max="12" step="0.05" value="0" aria-label="시간">
+  </section>
+
+  <section class="card">
+    <h2>이게 얼마나 많은 걸까?</h2>
+    <p class="desc">지금 본 사람 수를 학생들이 아는 크기와 견줘 봅니다.</p>
+    <div id="scaleRows"></div>
+    <p class="note">※ 견줌 기준은 예시입니다. 학교 규모에 맞게 <code>REFS</code> 값을 고치면 됩니다.</p>
+  </section>
+</div>
+
+<script src="spread-core.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.SpreadCore;
+  var NS = 'http://www.w3.org/2000/svg';
+  var PER = 100, END_T = 12, MS_PER_MIN = 1400;
+
+  var nodes = C.buildNodes(null, 4);
+  var byId = {};
+  nodes.forEach(function (n) { byId[n.id] = n; });
+  var people = nodes.filter(function (n) { return n.level > 0; })
+                    .sort(function (a, b) { return a.seeAt - b.seeAt || a.level - b.level; });
+
+  var S = { t: 0, view: 'b', playing: false, lastTs: 0, dragLon: 0, dragLat: 0 };
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function fmt(n) { return C.formatKo(n); }
+  function prand(i) { var x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+  /* ══════════════ 안 A — 낯선 화면들 ══════════════
+     한 칸 = 휴대폰 한 대(= 사람 1 = 팔로워 100명). 퍼지는 순서대로 화면이 켜진다. */
+  var COLS = 40, CW = 24, CH = 38, GAP = 5;
+  function buildA() {
+    var svg = $('viewA');
+    var rows = Math.ceil(people.length / COLS);
+    svg.setAttribute('viewBox', '0 0 ' + (COLS * (CW + GAP) - GAP) + ' ' + (rows * (CH + GAP) - GAP));
+    var frag = document.createDocumentFragment();
+    people.forEach(function (n, i) {
+      var x = (i % COLS) * (CW + GAP), y = Math.floor(i / COLS) * (CH + GAP);
+      var g = el('g', { class: 'ph' + (n.level === 1 ? ' me' : ''), transform: 'translate(' + x + ',' + y + ')' });
+      g.appendChild(el('rect', { class: 'body', width: CW, height: CH, rx: 4 }));
+      var scr = el('g', { class: 'scr' });
+      scr.appendChild(el('rect', { x: 2.5, y: 5, width: 19, height: 28, rx: 2, fill: '#fff2f7' }));
+      ['#ffb3cd', '#b9dcff', '#ffd9a8', '#a9ecd8'].forEach(function (c, k) {
+        scr.appendChild(el('rect', {
+          x: 4 + (k % 2) * 8.5, y: 6.5 + Math.floor(k / 2) * 12.5,
+          width: 7.5, height: 11, rx: 1.2, fill: c
+        }));
+      });
+      g.appendChild(scr);
+      frag.appendChild(g);
+      n.cellA = g;
+    });
+    svg.appendChild(frag);
+  }
+
+  /* ══════════════ 안 B — 도는 지구본 위에서 퍼지기 ══════════════
+     · 사람마다 위도·경도를 준다. 출발은 서울(37.5N, 127E).
+     · 매 프레임 정사영(orthographic)으로 다시 그린다 → 지구가 도는 것처럼 보인다.
+     · 뒤쪽(z<=0)으로 넘어간 사람과 선은 그리지 않는다 — 돌면 다시 나타난다.
+     · 성능: 점·선을 하나하나 element 로 두면 매 프레임 1,500개를 고쳐야 해서 느리다.
+       그래서 **단계별로 path 하나에 몰아 그린다**(점 5개 + 선 4개 = element 9개).
+       ⚠️ 이걸 원래대로 circle/line 여러 개로 되돌리지 말 것. */
+  var RAD = Math.PI / 180;
+  var ORIGIN = { lat: 37.5, lon: 127.0, name: '한국' };   // 서울
+  /* 단계마다 지구 위에서 몇 도씩 건너뛰는가. 합이 약 163도라 지구 반대편(180도)까지 닿는다 —
+     "전 세계로 퍼진다"를 보이게 하려고 크게 잡았다. 줄이면 아시아 근처에 몰린다. */
+  var HOP = [0, 48, 45, 38, 32];
+  var GR = 468;                       // 지구 반지름(좌표 단위)
+  var VB = 620;                       // viewBox 절반
+  var NR = [11, 7.5, 5, 3, 1.8];      // 단계별 점 크기
+  /* ⚠️ 회전 방향은 **지금까지 본 사람 전체의 평균 위치**로 정한다.
+     "최근에 본 사람만" 크게 쳐서(exp 가중치) 잡아 보았더니, 갈래마다 방향이 달라
+     0.25분마다 화면이 388px씩 튀었다 — 쓸 수 없었다. 누적 평균은 25px 로 부드럽다.
+     되돌리지 말 것. */
+  var FADE = 5;     // 갓 켜진 사람이 평균에 스며드는 시간(분). 크게 하면 더 부드럽다
+  var GAIN = 1.1;   // 확산이 쏠린 쪽으로 기울이는 정도
+  var SWEEP = 250;  // 퍼진 만큼 꾸준히 도는 각도. 전 세계로 퍼지므로 한 바퀴 가까이 훑어 준다
+
+  /* 아주 단순화한 세계 지도 (오대양 육대륙). 교실에서 "지구구나" 하고 알아보면 되는 수준이다.
+     정확한 지도가 아니므로 학습 자료로 지리 수업에 쓰지 말 것. */
+  var LAND = [
+    // 유라시아
+    [[-9,36],[-9,43],[-1,43],[1,49],[7,53],[5,58],[11,58],[10,64],[16,69],[28,71],[40,68],[55,70],
+     [68,73],[80,74],[95,78],[110,76],[128,73],[142,72],[160,70],[172,66],[168,60],[158,58],[150,53],
+     [142,46],[135,43],[131,43],[130,37],[127,34],[125,38],[122,40],[121,38],
+     [122,31],[122,23],[110,21],[105,10],[103,1],[98,8],[92,21],
+     [88,22],[80,15],[77,8],[73,15],[68,23],[61,25],[57,25],[50,29],[43,30],[35,36],[27,36],[23,40],
+     [13,38],[9,44],[3,43],[-2,37]],
+    // 아프리카
+    [[-6,36],[10,37],[20,33],[32,31],[35,24],[43,12],[51,12],[44,-2],[40,-16],[35,-25],[26,-34],
+     [18,-35],[12,-18],[9,-2],[8,4],[-8,4],[-13,10],[-17,15],[-16,22],[-12,28],[-9,32]],
+    // 북아메리카
+    [[-168,66],[-158,71],[-140,70],[-125,70],[-110,68],[-95,70],[-82,73],[-70,68],[-58,58],[-53,48],
+     [-65,44],[-70,41],[-76,35],[-81,26],[-83,30],[-89,29],[-97,26],[-105,20],[-95,16],[-84,10],
+     [-78,9],[-88,16],[-98,18],[-110,24],[-117,32],[-124,40],[-124,48],[-133,55],[-146,60],[-158,56],[-166,60]],
+    // 남아메리카
+    [[-78,8],[-72,11],[-62,10],[-52,5],[-50,0],[-44,-2],[-35,-6],[-37,-13],[-40,-20],[-48,-25],
+     [-54,-34],[-62,-40],[-66,-46],[-70,-53],[-75,-52],[-73,-44],[-72,-35],[-71,-25],[-70,-18],
+     [-76,-14],[-81,-5],[-79,2]],
+    // 오세아니아(호주)
+    [[113,-22],[115,-28],[118,-34],[126,-32],[131,-31],[137,-34],[141,-38],[147,-39],[151,-34],
+     [153,-27],[149,-21],[143,-13],[136,-12],[130,-12],[124,-15],[118,-19]],
+    // 인도네시아·뉴기니
+    [[96,5],[104,-2],[112,-4],[120,-4],[131,-1],[141,-3],[147,-8],[140,-9],[132,-8],[122,-9],[112,-8],[104,-7]],
+    // 그린란드
+    [[-45,60],[-32,66],[-25,71],[-20,76],[-30,82],[-45,83],[-58,82],[-68,78],[-58,70],[-50,64]],
+    // 일본
+    [[130,32],[134,34],[139,35],[142,40],[145,44],[141,45],[138,38],[134,33],[131,31]],
+    // 마다가스카르
+    [[44,-12],[50,-15],[50,-20],[47,-25],[44,-22],[43,-17]],
+    // 영국
+    [[-5,50],[1,51],[0,54],[-2,58],[-5,58],[-6,54]]
+  ];
+
+  /* 한 점에서 방위 brg 로 dist(도) 만큼 간 지점 (구면) */
+  function destPoint(lat1, lon1, brg, dist) {
+    var f1 = lat1 * RAD, l1 = lon1 * RAD, th = brg * RAD, d = dist * RAD;
+    var sf = Math.sin(f1) * Math.cos(d) + Math.cos(f1) * Math.sin(d) * Math.cos(th);
+    var f2 = Math.asin(Math.max(-1, Math.min(1, sf)));
+    var l2 = l1 + Math.atan2(Math.sin(th) * Math.sin(d) * Math.cos(f1), Math.cos(d) - Math.sin(f1) * sf);
+    return { lat: f2 / RAD, lon: ((l2 / RAD + 540) % 360) - 180 };
+  }
+
+  /* 점이 육지 안에 있는가 (레이 캐스팅).
+     대륙 다각형이 날짜변경선을 넘지 않게 그려 두었으므로 경도를 그대로 써도 된다. */
+  function inPoly(lon, lat, poly) {
+    var inside = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+      if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function onLand(lat, lon) {
+    for (var i = 0; i < LAND.length; i++) if (inPoly(lon, lat, LAND[i])) return true;
+    return false;
+  }
+
+  /* 지구는 "확산이 향하는 쪽"을 따라 돈다.
+     지금까지 본 사람들의 위치를 구면에서 평균 내고, 그 경도 쪽으로 화면을 돌린다.
+     갓 켜진 사람은 FADE 분에 걸쳐 서서히 반영되므로 화면이 툭툭 튀지 않는다.
+     시각 t 만으로 정해지는 값이라 슬라이더를 끌어도 늘 같은 각도가 나온다. */
+  function spreadLon(t) {
+    var sx = 0, sy = 0, tw = 0;
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i], w = (t - n.seeAt) / FADE;
+      if (w <= 0) continue;
+      if (w > 1) w = 1;
+      var f = n.lat * RAD, l = n.lon * RAD, cf = Math.cos(f);
+      sx += w * cf * Math.cos(l);
+      sy += w * cf * Math.sin(l);
+      tw += w;
+    }
+    if (tw === 0) return ORIGIN.lon;
+
+    /* ⚠️ 사방으로 고르게 퍼지면 평균 벡터가 0에 가까워져 방향이 마구 튄다(실제로 7분쯤에
+       90도 넘게 흔들렸다). 그래서 **방향이 뚜렷한 만큼만** 돌린다 —
+       벡터가 짧으면(뚜렷하지 않으면) 한국 쪽을 그대로 보고 있는다. */
+    var sharp = Math.min(1, Math.hypot(sx, sy) / tw / 0.45);
+    var lon = Math.atan2(sy, sx) / RAD;
+    var diff = ((lon - ORIGIN.lon + 540) % 360) - 180;   // 한국 기준 최단 각도차
+
+    /* 전 세계로 퍼지면 "확산 방향"이 사방이라 평균만 따라가면 화면이 심하게 흔들린다.
+       그래서 ① 퍼진 만큼 꾸준히 도는 회전(SWEEP)을 뼈대로 삼고
+             ② 그 위에 확산이 쏠린 쪽으로 조금 기울이는(GAIN) 것을 얹는다. */
+    var ratio = tw / nodes.length;
+    return ORIGIN.lon + SWEEP * ratio + diff * sharp * GAIN;
+  }
+
+  /* 정사영 — 화면 한가운데가 (phi0, lam0) 이다. z>0 이면 앞면(보임).
+     phi0 는 사용자가 지구본을 위아래로 끌 때 쓰는 기울기다(0이면 북극이 위). */
+  function proj(lat, lon, lam0, phi0) {
+    var f = lat * RAD, l = (lon - lam0) * RAD, p0 = (phi0 || 0) * RAD;
+    var cf = Math.cos(f), sf = Math.sin(f), cl = Math.cos(l);
+    var cp = Math.cos(p0), sp = Math.sin(p0);
+    return {
+      x: GR * cf * Math.sin(l),
+      y: -GR * (cp * sf - sp * cf * cl),
+      z: sp * sf + cp * cf * cl
+    };
+  }
+
+  var landEls = [], gratEl = null, eqEl = null;
+  var ndEls = [], edEls = [], hudTotal = null, hudVals = {}, labels = [];
+
+  function buildB() {
+    var svg = $('viewB');
+    svg.setAttribute('viewBox', (-VB) + ' ' + (-VB) + ' ' + (VB * 2) + ' ' + (VB * 2));
+
+    /* 사람마다 위도·경도 정하기.
+       ⚠️ 바다에는 사람이 살지 않으므로 **육지에 앉을 때까지 방향·거리를 다시 뽑는다.**
+       흩어짐은 고정된 식(prand)이라 새로 고쳐도 같은 모양이 나온다. */
+    var firsts = nodes.filter(function (n) { return n.level === 1; });
+    nodes.forEach(function (n, i) {
+      if (n.level === 0) { n.lat = ORIGIN.lat; n.lon = ORIGIN.lon; n.head = 0; return; }
+      var p = byId[n.parent];
+      var base = n.level === 1 ? (firsts.indexOf(n) / firsts.length) * 360 : p.head;
+      var span = n.level === 1 ? 26 : 170 / n.level;
+      var q = null, head = base;
+
+      // ① 부모가 향하던 쪽에서 찾되, 안 되면 조금씩 넓게 훑는다.
+      //    다만 ±80도를 넘겨 넓히지 않는다 — 그러면 왔던 쪽으로 되돌아가 한곳에 뭉친다.
+      for (var k = 0; k < 90 && !q; k++) {
+        var wob = Math.min(span * (1 + k * .09), 160);
+        var h = base + (prand(i * 91 + k * 7) - .5) * wob;
+        var c = destPoint(p.lat, p.lon, h, HOP[n.level] * (.55 + .9 * prand(i * 53 + k * 11)));
+        if (onLand(c.lat, c.lon)) { q = c; head = h; }
+      }
+      // ② 그래도 없으면 부모 둘레를 한 바퀴 훑는다 (섬처럼 사방이 바다인 경우)
+      for (var b = 0; b < 360 && !q; b += 6) {
+        for (var s = 0; s < 4 && !q; s++) {
+          var c2 = destPoint(p.lat, p.lon, b, HOP[n.level] * (.35 + s * .25));
+          if (onLand(c2.lat, c2.lon)) { q = c2; head = b; }
+        }
+      }
+      if (!q) { q = { lat: p.lat, lon: p.lon }; }   // 최후 — 부모 옆에 둔다
+      n.lat = q.lat; n.lon = q.lon; n.head = head;
+    });
+
+    svg.appendChild(el('circle', { class: 'ocean', r: GR, cx: 0, cy: 0 }));
+    LAND.forEach(function () {
+      var p = el('path', { class: 'land', d: '' });
+      svg.appendChild(p); landEls.push(p);
+    });
+    gratEl = el('path', { class: 'grat', d: '' }); svg.appendChild(gratEl);
+    eqEl = el('path', { class: 'eq', d: '' }); svg.appendChild(eqEl);
+
+    for (var lv = 1; lv <= 4; lv++) {
+      edEls[lv] = el('path', { class: 'ed' + lv, d: '' });
+      svg.appendChild(edEls[lv]);
+    }
+    for (var v = 0; v <= 4; v++) {
+      ndEls[v] = el('path', { class: 'nd' + v, d: '' });
+      svg.appendChild(ndEls[v]);
+    }
+
+    // "N분" 은 드문드문만 — 1차 7개 전부 + 2차는 넷에 하나
+    var l2 = 0;
+    nodes.forEach(function (n) {
+      if (!n.parent) return;
+      if (n.level === 1 || (n.level === 2 && (l2++ % 4 === 0))) {
+        var tx = el('text', { class: 'mlab', x: 0, y: 0, opacity: 0 });
+        tx.textContent = n.edgeMin + '분';
+        svg.appendChild(tx);
+        labels.push({ n: n, el: tx });
+      }
+    });
+
+    svg.appendChild(buildHud());
+  }
+
+  /* 위경도 격자 — 경선 12개, 위선 5개. 앞면 부분만 이어서 그린다 */
+  function graticule(lam0, phi0, lons, lats) {
+    var d = '';
+    lons.forEach(function (lon) {
+      var pen = false;
+      for (var lat = -85; lat <= 85; lat += 5) {
+        var p = proj(lat, lon, lam0, phi0);
+        if (p.z > 0) { d += (pen ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); pen = true; }
+        else pen = false;
+      }
+    });
+    lats.forEach(function (lat) {
+      var pen = false;
+      for (var lon = -180; lon <= 180; lon += 5) {
+        var p = proj(lat, lon, lam0, phi0);
+        if (p.z > 0) { d += (pen ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); pen = true; }
+        else pen = false;
+      }
+    });
+    return d;
+  }
+
+  /* 대륙 — 뒤로 넘어간 꼭짓점은 지구 가장자리로 밀어붙여(clamp) 자연스럽게 잘리게 한다.
+     ⚠️ 꼭짓점만 밀면 가장자리 근처 해안선이 크게 찌그러져 "육지에 있는 사람이 바다에 있는 것처럼"
+     보인다. 그래서 변마다 SUB 등분해서 촘촘히 찍는다 — 그러면 지평선을 따라 정확히 잘린다. */
+  var SUB = 8;
+  function landPath(poly, lam0, phi0) {
+    var any = false, d = '';
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      for (var s = 0; s < SUB; s++) {
+        var f = s / SUB;
+        var p = proj(a[1] + (b[1] - a[1]) * f, a[0] + (b[0] - a[0]) * f, lam0, phi0);
+        var x = p.x, y = p.y;
+        if (p.z > 0) any = true;
+        else { var h = Math.sqrt(x * x + y * y) || 1; x = x / h * GR; y = y / h * GR; }
+        d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+      }
+    }
+    return any ? d + 'Z' : '';
+  }
+
+  var HUD_ROWS = [
+    { lv: 1, name: '1차', color: '#ff4d6d' },
+    { lv: 2, name: '2차', color: '#ff9f1c' },
+    { lv: 3, name: '3차', color: '#ffc46b' },
+    { lv: 4, name: '4차', color: '#ffdca6' }
+  ];
+  function buildHud() {
+    var W = 320, H = 268;
+    var g = el('g', { class: 'hud', transform: 'translate(' + (-VB + 26) + ',' + (-VB + 26) + ')' });
+    g.appendChild(el('rect', { class: 'hud-bg', width: W, height: H, rx: 20 }));
+    var t1 = el('text', { class: 'hud-t', x: 22, y: 44 });
+    t1.textContent = '지금까지 본 사람';
+    g.appendChild(t1);
+    hudTotal = el('text', { class: 'hud-big', x: 22, y: 100 });
+    hudTotal.textContent = '0명';
+    g.appendChild(hudTotal);
+    g.appendChild(el('line', { class: 'hud-div', x1: 22, y1: 124, x2: W - 22, y2: 124 }));
+    HUD_ROWS.forEach(function (r, i) {
+      var y = 158 + i * 33;
+      g.appendChild(el('circle', { cx: 32, cy: y - 8, r: 8, fill: r.color }));
+      var nm = el('text', { class: 'hud-r', x: 50, y: y }); nm.textContent = r.name; g.appendChild(nm);
+      var v = el('text', { class: 'hud-n', x: W - 22, y: y }); v.textContent = '0명'; g.appendChild(v);
+      hudVals[r.lv] = v;
+    });
+    return g;
+  }
+
+  function renderB(t) {
+    // 자동 회전(확산 방향) + 사용자가 끌어서 돌린 만큼
+    var lam0 = spreadLon(t) + S.dragLon;
+    var phi0 = S.dragLat;
+    window.__lam0 = lam0;   // 회전이 매끄러운지 재 보려고 열어 둔 값 (기능에는 영향 없음)
+
+    LAND.forEach(function (poly, i) { landEls[i].setAttribute('d', landPath(poly, lam0, phi0)); });
+    gratEl.setAttribute('d', graticule(lam0, phi0, [-150,-120,-90,-60,-30,0,30,60,90,120,150,180], [-60,-30,30,60]));
+    eqEl.setAttribute('d', graticule(lam0, phi0, [], [0]));
+
+    nodes.forEach(function (n) {
+      var p = proj(n.lat, n.lon, lam0, phi0);
+      n._x = p.x; n._y = p.y; n._z = p.z;
+      n._on = n.level === 0 || n.seeAt <= t;
+    });
+
+    var dn = ['', '', '', '', ''], de = ['', '', '', '', ''];
+    nodes.forEach(function (n) {
+      if (!n._on || n._z <= 0) return;
+      var r = NR[n.level], x = n._x.toFixed(1), y = n._y.toFixed(1);
+      dn[n.level] += 'M' + (n._x - r).toFixed(1) + ' ' + y +
+        'a' + r + ' ' + r + ' 0 1 0 ' + (r * 2) + ' 0a' + r + ' ' + r + ' 0 1 0 ' + (-r * 2) + ' 0';
+      if (n.parent) {
+        var p = byId[n.parent];
+        if (p._z > 0) de[n.level] += 'M' + p._x.toFixed(1) + ' ' + p._y.toFixed(1) + 'L' + x + ' ' + y;
+      }
+    });
+    for (var lv = 1; lv <= 4; lv++) edEls[lv].setAttribute('d', de[lv]);
+    for (var v = 0; v <= 4; v++) ndEls[v].setAttribute('d', dn[v]);
+
+    labels.forEach(function (L) {
+      var n = L.n, p = byId[n.parent];
+      var show = n._on && n._z > 0 && p._z > 0;
+      L.el.setAttribute('opacity', show ? 1 : 0);
+      if (show) {
+        L.el.setAttribute('x', ((p._x + n._x) / 2).toFixed(1));
+        L.el.setAttribute('y', ((p._y + n._y) / 2).toFixed(1));
+      }
+    });
+  }
+
+  /* ══════════════ 공통 ══════════════ */
+  var VIEWS = {
+    a: {
+      title: '안 A · 낯선 화면들',
+      desc: '한 칸이 휴대폰 한 대(= 팔로워 100명)입니다. 퍼지는 순서대로 화면이 켜지고, ' +
+            '켜진 화면마다 내 사진이 떠오릅니다. 민트색 테두리 7칸만 내가 아는 사람입니다.'
+    },
+    b: {
+      title: '안 B · 도는 지구본',
+      desc: '한국(민트색 점)에서 시작해 육지를 따라 퍼져 나갑니다. ' +
+            '지구는 시계처럼 도는 게 아니라 <b>확산이 향하는 쪽을 따라</b> 돕니다 — ' +
+            '사람이 퍼져 간 방향으로 화면이 천천히 돌아가고, 뒤로 넘어간 사람은 잠시 안 보입니다. ' +
+            '퍼지기 전에는 선도 보이지 않습니다.'
+    }
+  };
+
+  function render() {
+    var t = S.t, lit = 0, litKnown = 0, byLv = [0, 0, 0, 0, 0];
+    nodes.forEach(function (n) {
+      if (n.level > 0 && n.seeAt <= t) { lit++; byLv[n.level]++; if (n.level === 1) litKnown++; }
+    });
+    var total = lit * PER;
+
+    if (S.view === 'a') {
+      nodes.forEach(function (n) {
+        if (n.cellA) n.cellA.classList.toggle('on', n.seeAt <= t);
+      });
+    } else {
+      renderB(t);   // 확산이 향하는 쪽으로 지구가 돈다
+    }
+
+    hudTotal.textContent = fmt(total) + '명';
+    HUD_ROWS.forEach(function (r) { hudVals[r.lv].textContent = fmt(byLv[r.lv] * PER) + '명'; });
+    $('vT').textContent = t.toFixed(1);
+    $('vN').textContent = fmt(total);
+    $('slider').value = t;
+
+    if (lit === 0) {
+      $('punch').innerHTML = '아직 아무에게도 퍼지지 않았어요. <b>▶ 재생</b>을 눌러 보세요.';
+    } else if (S.view === 'a') {
+      $('punch').innerHTML = '지금 <b>' + fmt(lit) + '대</b>의 휴대폰에 내 사진이 떠 있어요(' + fmt(total) + '명). ' +
+        '그중 내가 아는 사람은 <b>' + litKnown + '대</b>, 나머지 <b>' + fmt(lit - litKnown) + '대</b>는 모르는 사람이에요.';
+    } else {
+      var done = lit === people.length;
+      $('punch').innerHTML = done
+        ? '<b>' + t.toFixed(1) + '분</b> 만에 <b>' + fmt(total) + '명</b>이 봤어요. ' +
+          '이제 <b>지구본을 끌어서 돌려 보세요</b> — 내 사진이 어디까지 갔는지 살펴볼 수 있어요.'
+        : '한국에서 올린 사진을 지금 <b>' + fmt(total) + '명</b>이 봤어요.' +
+          (byLv[4] > 0
+            ? ' <b>지구 반대편</b>에서도 보고 있어요 — 걸린 시간은 <b>' + t.toFixed(1) + '분</b>뿐이에요.'
+            : '');
+      $('dragHint').classList.toggle('ready', done);
+    }
+    renderScale(total);
+  }
+
+  var REFS = [
+    { n: 25, label: '우리 반', sub: '25명' },
+    { n: 500, label: '우리 학교 전교생', sub: '500명' },
+    { n: 5000, label: '큰 콘서트장', sub: '5,000명' },
+    { n: 25000, label: '야구장 만원 관중', sub: '25,000명' }
+  ];
+  function renderScale(total) {
+    var html = '', best = -1;
+    REFS.forEach(function (r, i) { if (total / r.n >= 1) best = i; });
+    REFS.forEach(function (r, i) {
+      var mx = total / r.n;
+      var w = Math.max(0, Math.min(100, Math.log10(mx + 1) / Math.log10(3200) * 100));
+      html += '<div class="scale-row' + (i === best ? ' hit' : '') + '">' +
+        '<div class="nm">' + r.label + '<em>' + r.sub + '</em></div>' +
+        '<div class="bar-bg"><div class="bar-fill" style="width:' + w.toFixed(1) + '%"></div></div>' +
+        '<div class="mx">' + (mx >= 10 ? '×' + fmt(mx) : mx >= 1 ? '×' + mx.toFixed(1) : '—') + '</div></div>';
+    });
+    $('scaleRows').innerHTML = html;
+  }
+
+  /* ══════════════ 조작 ══════════════ */
+  function setTime(t) { S.t = Math.max(0, Math.min(END_T, t)); render(); }
+  function tick(ts) {
+    if (!S.playing) return;
+    if (!S.lastTs) S.lastTs = ts;
+    setTime(S.t + (ts - S.lastTs) / MS_PER_MIN);
+    S.lastTs = ts;
+    if (S.t >= END_T) { S.playing = false; $('btnPlay').textContent = '↻ 다시 보기'; return; }
+    requestAnimationFrame(tick);
+  }
+  function play() {
+    if (S.t >= END_T) setTime(0);
+    S.playing = true; S.lastTs = 0;
+    $('btnPlay').textContent = '⏸ 잠깐 멈춤';
+    requestAnimationFrame(tick);
+  }
+  function setView(v) {
+    S.view = v;
+    $('viewA').classList.toggle('hidden', v !== 'a');
+    $('viewB').classList.toggle('hidden', v !== 'b');
+    $('vTitle').textContent = VIEWS[v].title;
+    $('vDesc').innerHTML = VIEWS[v].desc;
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-view') === v);
+    });
+    render();
+  }
+
+  /* 지구본을 끌어서 돌리기 — 확산이 끝난 뒤 여기저기 살펴보라고 넣었다.
+     가로로 끌면 돌고(경도), 세로로 끌면 기울어진다(위도). 자동 회전 위에 더해진다. */
+  (function enableDrag() {
+    var svg = $('viewB'), on = false, px = 0, py = 0;
+    svg.addEventListener('pointerdown', function (e) {
+      on = true; px = e.clientX; py = e.clientY;
+      svg.setPointerCapture(e.pointerId);
+      svg.classList.add('grabbing');
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (!on) return;
+      var w = svg.getBoundingClientRect().width || 1;
+      S.dragLon -= (e.clientX - px) / w * 200;
+      S.dragLat = Math.max(-75, Math.min(75, S.dragLat + (e.clientY - py) / w * 200));
+      px = e.clientX; py = e.clientY;
+      render();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (ev) {
+      svg.addEventListener(ev, function () { on = false; svg.classList.remove('grabbing'); });
+    });
+  })();
+
+  buildA();
+  buildB();
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+    b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
+  });
+  $('btnPlay').addEventListener('click', function () {
+    if (S.playing) { S.playing = false; this.textContent = '▶ 이어서 보기'; } else play();
+  });
+  $('btnReset').addEventListener('click', function () {
+    S.playing = false; $('btnPlay').textContent = '▶ 재생';
+    S.dragLon = 0; S.dragLat = 0;
+    setTime(0);
+  });
+  $('btnCenter').addEventListener('click', function () {
+    S.dragLon = 0; S.dragLat = 0; render();
+  });
+  $('btn10').addEventListener('click', function () {
+    S.playing = false; $('btnPlay').textContent = '▶ 이어서 보기'; setTime(C.DEADLINE);
+  });
+  $('slider').addEventListener('input', function (e) {
+    S.playing = false; $('btnPlay').textContent = '▶ 이어서 보기'; setTime(Number(e.target.value));
+  });
+
+  setView('b');
+})();
+</script>
+</body>
+</html>

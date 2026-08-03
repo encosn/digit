@@ -663,6 +663,41 @@ npm run build   → dist/ 생성   (npm run preview 로 확인, 개발 서버를
 외부 의존성이 없어서 `index.html` 을 더블클릭으로도 열 수 있게 만들었다
 (`data-cleaner`·`excel-picker` 와 다른 점 — 그 둘은 SheetJS 를 import 하므로 서버가 필요하다).
 
+## 배포 방법 — **`git push` 하나가 전부다** (2026-08-03 확인)
+
+| | |
+|:---|:---|
+| 저장소 | `encosn/digit` (**폴더 이름과 다르다**) |
+| 주소 | https://encosn.github.io/digit/ |
+| 방식 | **GitHub Pages 가 `main` 브랜치 루트의 소스를 그대로 서비스** |
+| 빌드 | **배포에 쓰이지 않는다.** `npm run build` 는 로컬 확인용이고 `dist/` 는 `.gitignore` 대상 |
+
+```
+cd C:\project_AI\02.개인프로젝트\디지털문화\spread-simulator
+npm test                 (먼저 통과시킬 것)
+git add -A && git commit -m "..." && git push origin main
+```
+
+- **⚠️ `.github/workflows/` 가 없다. 이 저장소 역사상 한 번도 없었다**
+  (`git log --all --oneline -- .github` 가 빈 결과). 브랜치도 `main` 하나뿐이다.
+  그런데도 **루트 `C:\project_AI\CLAUDE.md` 는 오랫동안 이 앱을 "Actions 빌드 배포"로 적어 두었다.**
+  2026-08-03 에 정정했지만, 그 오기 때문에 *"Actions 가 알아서 올려 주겠지"* 하고
+  **push 를 빠뜨릴 뻔했다.** 이 앱은 **직접 push 해야** 학생 화면이 바뀐다.
+- 소스 직접 서비스가 가능한 이유는 이 앱이 **외부 의존성 0개 + 일반 `<script src>`** 이기 때문이다.
+  (`index.html` 더블클릭이 되게 만든 성질이 그대로 배포에도 쓰인다 — 위 「왜 `.mjs` 인가」 참고)
+  **ES 모듈이나 npm 패키지를 새로 들이면 이 방식이 깨진다.** 그때는
+  `binary-converter/.github/workflows/deploy.yml` 을 복사해 Actions 배포로 바꾸고
+  (`npm test` 단계도 넣을 것), 루트 문서의 배포표도 함께 고쳐야 한다.
+- 소스를 그대로 서비스하므로 **이 `CLAUDE.md`·`tests/`·`alt-views.html`·`vite.config.mjs` 도
+  공개 URL 로 열린다.** 학생에게 보일 필요는 없지만 공개돼도 곤란한 내용은 아니다 —
+  다만 **여기에 실제 개인정보나 자격증명을 적지 말 것.**
+- 배포 뒤 확인:
+  ```
+  curl -sL "https://encosn.github.io/digit/main.js?cb=1" | grep -c renderCompare
+  ```
+  반영까지 **30초~1분쯤** 걸린다(2026-08-03 실측: 세 번째 시도, 약 30초).
+- `hub/data.js` 에는 이미 `status: 'ready'` 로 이 주소가 들어 있다. **새로 추가할 것은 없다.**
+
 ## `.claude/launch.json` 을 고칠 때 (포트 8083)
 이 앱은 launch.json 이 **세 곳**에 걸려 있다. 포트를 바꾸면 전부 고쳐야 한다.
 

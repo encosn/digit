@@ -111,6 +111,30 @@ eq('아이콘 수만 세면 icon', C.judge('7', 700, 7).kind, 'icon');
 eq('그 밖의 오답은 wrong', C.judge('500', 700, 7).kind, 'wrong');
 eq('빈 칸이면 empty', C.judge('', 700, 7).kind, 'empty');
 
+/* ───────── 5-3. 「내 예상 vs 실제」 채점표 ───────── */
+group('내 예상 vs 실제 채점표');
+eq('1차 확산자는 4분에 다 본다 (채점표 (1)이 열리는 시각)', C.levelDoneTime(nodes, 1), 4);
+eq('2차 확산자는 9분에 다 본다 (채점표 (2)가 열리는 시각)', C.levelDoneTime(nodes, 2), 9);
+eq('없는 단계면 0분', C.levelDoneTime(nodes, 3), 0);
+eq('3차까지 만들면 3차는 10분에 다 본다', C.levelDoneTime(n3, 3), 10);
+eq('채점표가 다 열리는 시각은 문제 (3)의 10분을 넘지 않는다',
+  Math.max(C.levelDoneTime(nodes, 1), C.levelDoneTime(nodes, 2), C.DEADLINE), C.DEADLINE);
+
+eq('정확히 맞히면 correct', C.compareGuess('700', 700, 7).kind, 'correct');
+eq('맞히면 차이는 0', C.compareGuess('700', 700, 7).diff, 0);
+eq('적게 예상하면 diff 가 음수', C.compareGuess('500', 700, 7).diff, -200);
+eq('많게 예상하면 diff 가 양수', C.compareGuess('1000', 700, 7).diff, 300);
+eq('점 개수만 세면 icon (차이도 함께 알려준다)', C.compareGuess('7', 700, 7).kind, 'icon');
+eq('점 개수만 세면 693명 적게 쓴 셈', C.compareGuess('7', 700, 7).diff, -693);
+ok('실제가 예상의 몇 배인지 알려준다 (700 ÷ 100 = 7배)',
+  Math.abs(C.compareGuess('100', 700, 7).times - 7) < 1e-9);
+eq('많게 예상하면 times 는 1보다 작다', C.compareGuess('7000', 700, 7).times, 0.1);
+eq('빈 칸이면 empty', C.compareGuess('', 700, 7).kind, 'empty');
+eq('빈 칸이면 차이를 계산하지 않는다', C.compareGuess('', 700, 7).diff, null);
+eq('빈 칸이어도 실제 답은 알려준다', C.compareGuess('', 700, 7).correct, 700);
+eq('0 을 쓰면 배수는 못 구한다 (0으로 나누지 않는다)', C.compareGuess('0', 700, 7).times, null);
+eq('쉼표를 넣어 써도 읽는다', C.compareGuess('3,100', 3100, 31).kind, 'correct');
+
 /* ───────── 5-2. 단계를 늘렸을 때의 확산 ───────── */
 group('단계를 늘렸을 때의 확산');
 eq('10분에 3차까지면 17,500명', C.peopleAt(n3, 10, 100).total, 17500);

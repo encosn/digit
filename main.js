@@ -63,9 +63,11 @@
     dragLon: 0, dragLat: 0,     // 학생이 지구본을 끌어서 돌린 각도
     posted: false,              // 게시물을 올렸는가 (개인 정보 정답이 공개된다)
     movedOn: false,             // 개인 정보를 확인하고 넘어갔는가 (① 문제가 열린다)
-    answered: {},               // 답을 써 본 문제 번호
-    simReady: false,            // 세 문제에 다 답했는가 (「확산 보러 가기」 버튼이 나타난다)
+    answered: {},               // 「확인」을 눌러 채점해 본 문제 번호
+    simReady: false,            // 세 칸을 다 채웠는가 (「확산 보러 가기」 버튼이 나타난다)
     simOpen: false,             // 그 버튼을 눌렀는가 (② 확산 그림이 열린다)
+    guess: ['', '', ''],        // ②로 넘어가는 순간 붙잡아 둔 학생의 예상 (채점표에 쓴다)
+    cmpShown: [false, false, false],   // 채점표에서 이미 공개된 줄 (한 번 열리면 닫히지 않는다)
     unlocked: false,            // 10분까지 확산을 봤는가 (③ 더 알아보기가 열린다)
     deleted: false, deletedAt: 0, deletedPeople: 0
   };
@@ -424,6 +426,7 @@
       badge.textContent = '';
     }
 
+    updateCompare();
     if (S.deleted) updateDeleteOut(r.total);
   }
 
@@ -496,7 +499,9 @@
     setTimeout(function () { $('quizCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
   }
 
-  /* 세 문제에 모두 답을 쓰면 「확산 보러 가기」 버튼만 나타난다.
+  /* 세 칸에 숫자를 다 채우면 「확산 보러 가기」 버튼만 나타난다.
+     ⚠️ 조건은 **정답도, 「확인」을 누른 것도 아니고 "숫자를 채웠는가"** 다 (사용자 지시).
+        막힌 학생도 다음 화면으로 넘어가서 거기서 답을 확인하게 하려는 것이다.
      ⚠️ 여기서 확산 그림을 열지 말 것 — 답을 확인할 틈도 없이 다음 화면이 튀어나온다. */
   function readySim() {
     if (S.simReady) return;
@@ -505,11 +510,14 @@
     $('btnToSim').classList.remove('stage-locked');
   }
 
-  /* 3단계 — 버튼을 눌러야 비로소 확산 그림이 열린다 ("예상 → 확인" 순서) */
+  /* 3단계 — 버튼을 눌러야 비로소 확산 그림이 열린다 ("예상 → 확인" 순서).
+     이때 학생이 쓴 세 숫자를 붙잡아 두고(S.guess) 채점표를 만든다. */
   function openSim() {
     if (S.simOpen) return;
     S.simOpen = true;
+    S.guess = quizInputs().map(function (i) { return i.value; });
     $('simCard').classList.remove('stage-locked');
+    renderCompare();
     setStep(3);
     setTimeout(function () { $('simCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
   }
@@ -600,6 +608,15 @@
   /** 문제는 화면 설정과 상관없이 늘 교과서 기준(팔로워 100명 · 2차까지)으로 채점한다 */
   function quizAnswers() { return C.answers(S.nodes, C.DEFAULT_FOLLOWERS); }
 
+  /** 문제 (1)(2)(3) 의 답 칸 세 개 */
+  function quizInputs() {
+    return Array.prototype.slice.call(document.querySelectorAll('.q .q-input'));
+  }
+  /** 세 칸에 숫자가 다 들어갔는가 (정답인지는 보지 않는다) */
+  function quizFilled() {
+    return quizInputs().every(function (i) { return C.parseAnswer(i.value) !== null; });
+  }
+
   function bindQuiz() {
     Array.prototype.forEach.call(document.querySelectorAll('.q'), function (box) {
       var idx = Number(box.getAttribute('data-q')) - 1;
@@ -618,17 +635,104 @@
           '점 1개 = 팔로워 100명이니까 <b>× 100</b>을 해 보세요.');
         else show('no', '아직 아니에요. ' + QUIZ[idx].wrong());
 
-        // 세 문제에 모두 답을 써 보면(맞든 틀리든) 「확산 보러 가기」 버튼이 나타난다
-        if (res.kind !== 'empty') {
-          S.answered[idx] = true;
-          if (Object.keys(S.answered).length === 3) readySim();
-        }
+        if (res.kind !== 'empty') S.answered[idx] = true;
       });
       box.querySelector('.q-hint').addEventListener('click', function () { show('warn', '💡 ' + QUIZ[idx].hint); });
       input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') box.querySelector('.q-check').click();
       });
+      // ⚠️ 「확인」을 누르지 않아도, 세 칸을 채우기만 하면 다음으로 넘어갈 수 있다
+      input.addEventListener('input', function () { if (quizFilled()) readySim(); });
     });
+  }
+
+  /* ───────── 8-2. 「내 예상 vs 실제」 채점표 (② 화면) ─────────
+     ⚠️ 문제 화면에서 「확인」을 안 눌러도 넘어올 수 있으므로, **채점은 여기가 본진**이다.
+        한 줄씩 나오는 이유: 그 단계의 확산이 끝나야 실제 인원이 확정되기 때문이다
+        (1차 4분 · 2차 9분 · 10분 문제 10분). 계기판의 숫자와 정확히 같은 시각이다. */
+  var CMP = [
+    { key: 'q1', label: '(1) 1차 확산' },
+    { key: 'q2', label: '(2) 2차 확산' },
+    { key: 'q3', label: '(3) 10분 안에' }
+  ];
+
+  /** 각 줄이 채점되는 시각(분) — 자료에서 뽑으므로 관계망을 고치면 함께 따라온다 */
+  function cmpTimes() {
+    return [C.levelDoneTime(S.nodes, 1), C.levelDoneTime(S.nodes, 2), C.DEADLINE];
+  }
+
+  /** 예상이 얼마나 빗나갔는지 한 문장으로 */
+  function cmpDiffText(r) {
+    if (r.kind === 'empty') return '답을 쓰지 않았어요';
+    if (r.kind === 'correct') return '🎉 정확히 맞혔어요!';
+    if (r.kind === 'icon') {
+      return '아깝다! ' + fmt(r.guess) + '은(는) <b>점의 개수</b>예요 (× 100 하면 정답)';
+    }
+    var gap = Math.abs(r.diff);
+    var many = r.times !== null && (r.times >= 2 || r.times <= 0.5);
+    var scale = many
+      ? ' <em>(실제가 내 예상의 약 ' + (r.times >= 1 ? niceTimes(r.times) + '배' : '1/' + niceTimes(1 / r.times)) + ')</em>'
+      : '';
+    return (r.diff < 0 ? '실제보다 <b>' + fmt(gap) + '명</b> 적게 예상했어요'
+                       : '실제보다 <b>' + fmt(gap) + '명</b> 많게 예상했어요') + scale;
+  }
+  /** 4.36 → "4.4", 12.0 → "12" */
+  function niceTimes(x) { return x < 10 ? String(Math.round(x * 10) / 10) : String(Math.round(x)); }
+
+  function renderCompare() {
+    if (!S.simOpen) return;
+    var a = quizAnswers();
+    var when = cmpTimes();
+    var rows = '', waiting = [], right = 0;
+
+    CMP.forEach(function (q, i) {
+      var ans = a[q.key];
+      var r = C.compareGuess(S.guess[i], ans.people, ans.icons);
+      var mine = r.guess === null ? '<b class="none">안 씀</b>' : '<b>' + fmt(r.guess) + '</b>명';
+
+      // 아직 그 단계까지 안 퍼졌으면 줄을 만들지 않고 아래 한 줄에 모아 둔다
+      if (!S.cmpShown[i]) {
+        waiting.push({ mine: '<b>' + q.label.slice(0, 3) + '</b> ' + mine, at: when[i] + '분' });
+        return;
+      }
+      if (r.kind === 'correct') right += 1;
+      rows += '<li class="cmp-row ' + (r.kind === 'correct' ? 'ok' : 'miss') + '">' +
+        '<span class="cmp-q">' + q.label + '</span>' +
+        '<span class="cmp-mine">내 예상 ' + mine + '</span>' +
+        '<span class="cmp-real">실제 <b>' + fmt(ans.people) + '</b>명</span>' +
+        '<span class="cmp-diff">' + cmpDiffText(r) + '</span></li>';
+    });
+    $('cmpList').innerHTML = rows;
+
+    var done = CMP.length - waiting.length;
+    $('cmpSum').innerHTML = done === 0
+      ? '⏱ 확산을 지켜보면 <b>한 줄씩</b> 채점돼요'
+      : '채점 <b>' + done + '</b> / ' + CMP.length;
+
+    if (waiting.length) {
+      // 한 줄에 들어가게 「내 예상 …」과 「채점 시각 …」을 따로 모아 쓴다
+      $('cmpNote').className = 'cmp-note';
+      $('cmpNote').innerHTML = '🔒 아직 채점 전 — 내 예상 ' +
+        waiting.map(function (w) { return w.mine; }).join(' · ') +
+        ' <em>→ ' + (waiting.length > 1 ? '각각 ' : '') +
+        waiting.map(function (w) { return w.at; }).join(' · ') + '에 채점돼요</em>';
+    } else {
+      $('cmpNote').className = 'cmp-note cmp-lesson';
+      $('cmpNote').innerHTML = right === CMP.length
+        ? '🎉 세 문제 <b>모두 정답</b>! 예상한 그대로 퍼졌어요.'
+        : '세 문제 중 <b>' + right + '개</b> 정답 — 정답을 못 맞혀도 괜찮아요. ' +
+          '중요한 건 <b>사진 한 장이 10분 만에 이만큼 퍼진다</b>는 것이에요.';
+    }
+  }
+
+  /** 시각이 흘러 새로 채점할 줄이 생겼는지 본다 (한 번 열린 줄은 되감아도 닫지 않는다) */
+  function updateCompare() {
+    if (!S.simOpen) return;
+    var when = cmpTimes(), changed = false;
+    for (var i = 0; i < CMP.length; i++) {
+      if (!S.cmpShown[i] && S.t >= when[i]) { S.cmpShown[i] = true; changed = true; }
+    }
+    if (changed) renderCompare();
   }
 
   /* ───────── 9. 더 알아보기 ───────── */

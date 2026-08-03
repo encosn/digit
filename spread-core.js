@@ -158,6 +158,19 @@
     }, 0);
   }
 
+  /**
+   * level 차 확산자가 **전부** 보게 되는 시각(분).
+   *   1차 → 4분, 2차 → 9분
+   *
+   * 문제 (1)(2) 의 답이 확정되는 순간이라, ② 화면의 「내 예상 채점표」가
+   * 이 시각이 지나야 그 줄을 채점한다 (확산을 지켜봐야 답이 나오게 하려는 것).
+   */
+  function levelDoneTime(nodes, level) {
+    return nodes.reduce(function (m, n) {
+      return n.level === level && n.seeAt > m ? n.seeAt : m;
+    }, 0);
+  }
+
   /** 1분에 몇 명씩 퍼지고 있는지 (0분이면 0) */
   function spreadSpeed(totalPeople, t) {
     if (!t || t <= 0) return 0;
@@ -205,6 +218,29 @@
     return { kind: 'wrong', value: v };
   }
 
+  /**
+   * 학생의 예상과 실제 답을 견준다 — judge() 에 "얼마나 차이 나는가" 를 더한 것.
+   * ② 화면의 「내 예상 채점표」가 쓴다.
+   *
+   *  kind    : judge() 와 같다 (correct / icon / wrong / empty)
+   *  guess   : 학생이 쓴 수 (안 썼으면 null)
+   *  diff    : 예상 - 실제. 음수면 **적게** 예상한 것이다
+   *  times   : 실제 ÷ 예상. 몇 배나 빗나갔는지 (예상이 0이거나 없으면 null)
+   */
+  function compareGuess(text, correct, icons) {
+    var j = judge(text, correct, icons);
+    if (j.kind === 'empty') {
+      return { kind: 'empty', guess: null, correct: correct, diff: null, times: null };
+    }
+    return {
+      kind: j.kind,
+      guess: j.value,
+      correct: correct,
+      diff: j.value - correct,
+      times: j.value > 0 ? correct / j.value : null
+    };
+  }
+
   /** 1234567 → "1,234,567" */
   function formatKo(n) {
     return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -222,10 +258,12 @@
     countAt: countAt,
     peopleAt: peopleAt,
     maxSeeTime: maxSeeTime,
+    levelDoneTime: levelDoneTime,
     spreadSpeed: spreadSpeed,
     answers: answers,
     parseAnswer: parseAnswer,
     judge: judge,
+    compareGuess: compareGuess,
     formatKo: formatKo
   };
 

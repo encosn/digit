@@ -348,6 +348,62 @@ body.posted .tag.wrong::after { content: ' ✕'; text-decoration: none; }
 .deep-only { display: none !important; }
 body.deep-on .deep-only { display: block !important; }
 
+/* ───────── 내 예상 채점표 ─────────
+   ⚠️ 채점된 문제만 `.cmp-row` 한 줄이 되고, 아직인 것은 `.cmp-note` 한 줄에 모인다.
+      세 줄을 처음부터 펴 두면 확산 카드가 한 화면을 넘어간다(867 → 1,095px 를 겪었다). */
+.compare {
+  background: var(--surface-2);
+  border: 1px solid rgba(140, 160, 255, .3);
+  border-radius: 16px;
+  padding: 10px 15px 10px;
+  margin-bottom: 14px;
+}
+.cmp-head {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  justify-content: space-between; gap: 4px 14px;
+  margin: 0 0 7px;
+  font-size: 16px; color: var(--sub);
+}
+.cmp-head > b { font-size: 20px; color: var(--text); }
+.cmp-head b { color: var(--text); }
+
+.cmp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.cmp-list:empty { display: none; }
+.cmp-row {
+  display: grid;
+  grid-template-columns: minmax(108px, auto) minmax(118px, auto) minmax(110px, auto) minmax(0, 1fr);
+  gap: 2px 16px;
+  align-items: baseline;
+  padding: 5px 12px;
+  border-radius: 11px;
+  background: var(--surface-3);
+  font-size: 17px;
+  color: var(--sub);
+  animation: revealIn .35s ease-out;
+}
+.cmp-row b { color: var(--text); font-variant-numeric: tabular-nums; }
+.cmp-row em { font-style: normal; }
+.cmp-q { font-weight: 800; color: var(--text); }
+.cmp-mine b { color: var(--c-indigo); }
+.cmp-mine b.none { color: var(--mute); font-weight: 600; }
+.cmp-real b { color: var(--c-warm-soft); }
+.cmp-row.ok { background: rgba(20, 200, 140, .16); }
+.cmp-row.ok .cmp-diff { color: var(--c-ok); font-weight: 700; }
+.cmp-row.miss .cmp-diff { color: var(--c-hot-soft); }
+.cmp-row.miss .cmp-diff b { color: #fff; }
+
+/* 아직 채점 안 된 문제들(잠김) → 다 채점되면 같은 자리에 결론 한 줄이 온다 */
+.cmp-note { margin: 7px 2px 0; font-size: 16px; color: var(--mute); }
+.cmp-note b { color: var(--sub); }
+.cmp-note em { font-style: normal; }
+.cmp-note.cmp-lesson { color: #ffd166; font-weight: 700; font-size: 17px; }
+.cmp-note.cmp-lesson b { color: #ffe08a; }
+
+@media (max-width: 900px) {
+  .cmp-row { grid-template-columns: 1fr 1fr; }
+  .cmp-q { grid-column: 1 / -1; }
+}
+
 .sim-grid {
   display: grid;
   /* 그림 칸을 되도록 넓게 — 줌아웃해도 글씨가 안 작아지므로 그림에 픽셀이 많을수록 좋다 */
@@ -779,11 +835,23 @@ h3 { margin-bottom: 6px; }
 .q-msg { margin-top: 10px; font-size: 17px; }
 .q-msg.ok, .q-msg.warn, .q-msg.no { padding: 10px 13px; }
 
-.stage-pick { padding: 10px 14px; margin-bottom: 13px; gap: 8px 14px; }
+.stage-pick { padding: 9px 14px; margin-bottom: 12px; gap: 8px 14px; }
 .stage-pick-tip { font-size: 16px; }
+/* 채점표가 줄어들 여지 — 채점이 다 끝나면 세 줄이 되므로 여백을 미리 조여 둔다 */
+.compare { padding: 9px 14px; margin-bottom: 12px; }
+.cmp-head { margin-bottom: 6px; }
+.cmp-head > b { font-size: 19px; }
+.cmp-row { padding: 4px 11px; font-size: 16px; }
+.cmp-note { margin-top: 6px; font-size: 15px; }
+.cmp-note.cmp-lesson { font-size: 16px; }
 .sim-grid { gap: 16px; }
 .stage-box { padding: 6px 6px 2px; }
-#net { max-height: 43vh; margin: 0 auto; }
+/* 채점표가 들어오면서 43vh → 41vh 로 조금 줄였다 (확산 카드를 한 화면 안에 두려고).
+   ② 가 열린 직후에는 오른쪽 계기판이 456px 이라, 여기를 **35vh 아래로** 낮춰야 비로소
+   계기판이 더 높아져 카드가 안 줄어든다 (41 → 35vh 로 낮추면 카드가 938 → 893px 로 45px 더 준다).
+   10분 시점에는 배지·채점 3줄이 붙어 계기판이 579px 이 되므로 그때는 지구본 크기가 카드 높이를
+   좌우하지 않는다. 더 줄일 여지는 남아 있지만, 지구본이 이 화면의 주인공이라 41vh 에서 멈췄다. */
+#net { max-height: 41vh; margin: 0 auto; }
 
 /* 조작 줄 — 버튼은 왼쪽, 슬라이더는 오른쪽으로 한 줄에 */
 .sim-bar {
@@ -808,7 +876,7 @@ h3 { margin-bottom: 6px; }
 .pick-box { padding: 10px 13px; }
 .pick-msg { font-size: 16px; }
 .tip { font-size: 15px; }
-.next-hint { margin-top: 14px; padding: 10px 14px; font-size: 16px; }
+.next-hint { margin-top: 11px; padding: 10px 14px; font-size: 16px; }
 .deep { padding-top: 14px; margin-top: 14px; }
 .deep p { margin-bottom: 8px; }
 /* 결과 문장은 드롭다운 옆에 끼우지 말고 **아랫줄**로 내린다 (오른쪽 끝까지 밀려 읽기 나빴다) */

@@ -186,8 +186,8 @@
         <li>선 위 숫자 = 두 사람이 <b>보는 데 걸린 시간(분)</b></li>
         <li>홍길동 → 1차 → 2차 선의 시간을 다 더해도 <b>10분 미만</b></li>
       </ul>
-      <p class="dn-tip">💡 그림을 보고 세 문제의 답을 <b>예상해서</b> 써 보세요.
-        다 쓰면 <b>확산 그림</b>이 열립니다.</p>
+      <p class="dn-tip">💡 그림을 보고 답을 <b>예상해서</b> 써 보세요.
+        <b>세 칸을 채우면</b> 넘어가요 — 정답이 아니어도 괜찮아요.</p>
       </div>
     </div>
 
@@ -233,8 +233,8 @@
       <p class="q-msg"></p>
     </div>
 
-    <p class="next-hint" id="quizHint">🔒 세 문제에 모두 답을 쓰면 아래에
-      <b>퍼져 나가는 모습</b>이 열려요.</p>
+    <p class="next-hint" id="quizHint">🔒 세 칸에 숫자를 <b>모두 채우면</b> 넘어갈 수 있어요.
+      <b>정답이 아니어도 괜찮아요</b> — 다음 화면에서 채점해 줍니다.</p>
     <button class="btn primary big next-btn stage-locked" id="btnToSim">
       확산 보러 가기 → <small>내 예상이 맞았는지 확인하기</small>
     </button>
@@ -245,6 +245,15 @@
   <!-- 이 카드만 어둡다 — "온라인 공간"을 나타내고, 그 안에서 지구본이 빛나며 퍼진다. -->
   <section class="card sim-card stage-locked" id="simCard">
     <h2><span class="h2-num">②</span>퍼져 나가는 모습 보기 — 예상이 맞았을까?</h2>
+
+    <!-- 내 예상 채점표 — 확산이 그 단계까지 진행되면 한 줄씩 늘어난다 (내용은 main.js 가 채운다).
+         ⚠️ 아직 채점 안 된 문제는 줄을 만들지 않고 아래 `#cmpNote` 한 줄에 몰아 쓴다.
+            세 줄을 처음부터 펴 두면 확산 카드가 한 화면(1080p 기준)을 넘어간다. -->
+    <div class="compare" id="compareBox">
+      <p class="cmp-head"><b>📋 내가 쓴 예상 vs 실제</b><span id="cmpSum"></span></p>
+      <ol class="cmp-list" id="cmpList"></ol>
+      <p class="cmp-note" id="cmpNote"></p>
+    </div>
 
     <div class="stage-pick">
       <div class="segmented one">
